@@ -14,7 +14,7 @@ datasource db {
 }
 
 model User_Roles {
-  id        String   @id @default(uuid())
+  id        String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
   user_id   String   @unique
   role      String
   createdAt DateTime @default(now())
