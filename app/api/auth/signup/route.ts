@@ -3,9 +3,7 @@ import { supabaseAdmin } from '@/utils/supabase/server';
 
 export async function POST(request: Request) {
     const { email, password } = await request.json();
-    console.log('Attempting to create user:', email);
 
-    // Use Supabase Admin client to create a new user
     const { data, error } = await supabaseAdmin.auth.signUp({
         email,
         password,
