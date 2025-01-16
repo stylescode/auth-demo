@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import { Inter, Roboto_Mono } from 'next/font/google';
 import './globals.css';
+import SessionWrapper from '@/components/SessionWrapper';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -25,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${robotoMono.variable} antialiased`}>
       <body>
-        {children}
+        <SessionWrapper>{children}</SessionWrapper>
       </body>
     </html>
   );
