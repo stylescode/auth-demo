@@ -14,26 +14,29 @@ datasource db {
 }
 
 model User {
-  id        String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   user_id   String   @unique
   role      String
   username  String?  @unique
   createdAt DateTime @default(now())
+  Review    Review[]
 }
 
 model Game {
-  id          Int          @id @default(autoincrement())
-  name        String
-  release     DateTime?
+  id      Int       @id @default(autoincrement())
+  name    String
+  release DateTime?
 }
 
 model Review {
-  id          String       @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   game_id     Int
-  user_id     String
-  review_text     String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @default(now())
+  user_id     String @db.Uuid
+  review_text String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id])
 
   @@index([game_id])
 }
