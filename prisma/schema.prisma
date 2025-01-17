@@ -13,18 +13,27 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User_Roles {
+model User {
   id        String   @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
   user_id   String   @unique
   role      String
+  username  String?  @unique
   createdAt DateTime @default(now())
 }
 
 model Game {
-  id          Int       @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   name        String
-  description String?
   release     DateTime?
-  rating      Float?
+}
+
+model Review {
+  id          String       @id @db.Uuid @default(dbgenerated("gen_random_uuid()"))
+  game_id     Int
+  user_id     String
+  review_text     String
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+
+  @@index([game_id])
 }
