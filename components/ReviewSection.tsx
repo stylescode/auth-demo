@@ -26,6 +26,25 @@ export default function ReviewSection({ reviews }: { reviews: Review[] }) {
 
   };
 
+  const handleReviewDelete = async (id: number) => {
+    if (!confirm('Are you sure you want to delete this review?')) return;
+
+    // delete the review
+    const res = await fetch(`/api/game_reviews`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id }),
+    });
+
+    if (!res.ok) {
+      console.error('Failed to delete review');
+      return;
+    } else {
+      // refresh the page
+      window.location.reload();
+    }
+  }
+
   if (status === 'loading') return <p>Loading...</p>;
 
   return (
@@ -37,6 +56,9 @@ export default function ReviewSection({ reviews }: { reviews: Review[] }) {
           <small>Posted on {new Date(review.createdAt).toLocaleDateString()}</small>
           {session.user.publicUserId === review.user_id && (
             <button onClick={() => handleReviewUpdate(review.id, review.review_text)}>Update</button>
+          )}
+          {(session.user.publicUserId === review.user_id || session?.user.role === 'admin') && (
+            <button onClick={() => handleReviewDelete(review.id)}>Delete</button>
           )}
         </div>
       ))

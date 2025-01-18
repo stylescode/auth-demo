@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useSession } from 'next-auth/react';
 
 export default function ReviewForm({ gameId }: { gameId: string }) {
-  const session = useSession();
+  const { data: session, status } = useSession();
   console.log(session);
   const [reviewText, setReviewText] = useState('');
   const [error, setError] = useState('');
@@ -16,7 +16,7 @@ export default function ReviewForm({ gameId }: { gameId: string }) {
       return;
     }
 
-    if (!session.data) {
+    if (!session) {
       setError('You must be logged in to submit a review');
       return;
     }
@@ -25,7 +25,7 @@ export default function ReviewForm({ gameId }: { gameId: string }) {
       const res = await fetch(`/api/game_reviews`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ gameId, reviewText, userId: session.data.user.id }),
+        body: JSON.stringify({ gameId, reviewText, userId: session.user.publicUserId }),
       });
 
       if (!res.ok) throw new Error('Failed to submit review');
@@ -35,6 +35,8 @@ export default function ReviewForm({ gameId }: { gameId: string }) {
       setError(err.message);
     }
   };
+
+  if (status === 'loading') return <p></p>;
 
   return (
     <div>

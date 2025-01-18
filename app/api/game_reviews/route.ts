@@ -29,15 +29,22 @@ export async function GET(req: Request) {
 }
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { gameId, reviewText, userId } = await request.json();
-
+    console.log(gameId, reviewText, userId);
     // Check if the user exists
     const user = await prisma.user.findUnique({
-      where: { user_id: userId},
+      where: { id: userId},
     });
 
     if (!user) {
+      console.log('could NOT find a user');
       return NextResponse.json(
         { error: "User not found" },
         { status: 400 }
@@ -96,6 +103,24 @@ export async function PUT(request: Request) {
     });
 
     return NextResponse.json(review);
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json(
+      { error: error.message || "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(request: Request) {
+  try {
+    const { id } = await request.json();
+
+    await prisma.review.delete({
+      where: { id },
+    });
+
+    return NextResponse.json({ message: 'Review deleted' });
   } catch (error: any) {
     console.error(error);
     return NextResponse.json(
