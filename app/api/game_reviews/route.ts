@@ -31,12 +31,12 @@ export async function GET(req: Request) {
 export async function POST(request: Request) {
   try {
     const { gameId, reviewText, userId } = await request.json();
-    console.log('user id is', userId);
+
     // Check if the user exists
     const user = await prisma.user.findUnique({
       where: { user_id: userId},
     });
-    console.log('the user is', user);
+
     if (!user) {
       return NextResponse.json(
         { error: "User not found" },
@@ -77,6 +77,25 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(review, { status: 201 });
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json(
+      { error: error.message || "Something went wrong" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const { id, reviewText } = await request.json();
+
+    const review = await prisma.review.update({
+      where: { id },
+      data: { review_text: reviewText },
+    });
+
+    return NextResponse.json(review);
   } catch (error: any) {
     console.error(error);
     return NextResponse.json(

@@ -1,8 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { fetchGame } from '@/utils/rawg';
 import ReviewForm from '@/components/ReviewForm';
+import ReviewSection from '@/components/ReviewSection';
 
 const prisma = new PrismaClient();
+
 
 export default async function GamePage({ params }: { params: { id: string } }) {
   const gameId = params.id;
@@ -34,19 +36,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
       <h1>{gameData.name}</h1>
       <p>Release Date: </p>
       <h2>Reviews</h2>
-      <div>
-        {reviews.length ? (
-          reviews.map((review) => (
-            <div key={review.id}>
-              <p><strong>anonymous:</strong>: {review.review_text}</p>
-              <small>Posted on {new Date(review.createdAt).toLocaleDateString()}</small>
-            </div>
-          ))
-        ) : (
-          <p>No reviews yet. Be the first to add one!</p>
-        )}
-      </div>
-
+      <ReviewSection reviews={reviews} />
       <ReviewForm gameId={gameId} />
     </div>
   );
