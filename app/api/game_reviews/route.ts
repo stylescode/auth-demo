@@ -116,6 +116,23 @@ export async function DELETE(request: Request) {
   try {
     const { id } = await request.json();
 
+    const session = await getServerSession(authOptions);
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    const { role, publicUserId } = session.user;
+
+    const review = await prisma.review.findUnique({
+      where: { id },
+    });
+
+    if (!review || (review.user_id !== publicUserId && role !== 'admin')) {
+      return NextResponse.json(
+        { error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+
     await prisma.review.delete({
       where: { id },
     });
