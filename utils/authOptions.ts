@@ -1,6 +1,9 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { supabaseAdmin } from '@/utils/supabase/server';
+import { PrismaClient } from '@prisma/client';
+
+const prisma = new PrismaClient();
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -11,7 +14,6 @@ export const authOptions: NextAuthOptions = {
               password: { label: 'Password', type: 'password' },
           },
           async authorize(credentials) {
-            console.log('credentials')
             try {
                 if (!credentials) {
                     console.error("No credentials provided.");
@@ -19,8 +21,6 @@ export const authOptions: NextAuthOptions = {
                 }
 
                 const { email, password } = credentials as { email: string; password: string };
-
-                console.log("Attempting to sign in with:", { email });
 
                 const { data, error } = await supabaseAdmin.auth.signInWithPassword({
                     email,
@@ -37,8 +37,6 @@ export const authOptions: NextAuthOptions = {
                     throw new Error("Invalid credentials");
                 }
 
-                console.log("User successfully signed in:", data.user);
-
                 return { id: data.user.id, email: data.user.email };
             } catch (err) {
                 console.error("Authorize function error:", err);
@@ -51,18 +49,30 @@ export const authOptions: NextAuthOptions = {
       strategy: 'jwt',
   },
   callbacks: {
-        async session({ session, token }) {
-            if (session.user) {
-                session.user.id = token.id as string;
-            }
-            return session;
-        },
-        async jwt({ token, user }) {
-            if (user) {
-                token.id = user.id;
-            }
-            return token;
+    async jwt({ token, user }) {
+        if (user) {
+          // Store the id from auth.users in the token
+          token.authUserId = user.id;
+
+          // Fetch the id from public.users
+          const publicUser = await prisma.user.findUnique({
+            where: { user_id: user.id }, // user.id is from auth.users
+            select: { id: true }, // Fetch only the public.users id
+          });
+
+          if (publicUser) {
+            token.publicUserId = publicUser.id; // Add the public.users id to the token
+          }
         }
+        return token;
+      },
+      async session({ session, token }) {
+        if (session.user) {
+          session.user.authUserId = token.authUserId as string; // id from auth.users
+          session.user.publicUserId = token.publicUserId as string; // id from public.users
+        }
+        return session;
+      },
     },
   secret: process.env.NEXTAUTH_SECRET,
   debug: true
