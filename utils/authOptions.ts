@@ -57,11 +57,12 @@ export const authOptions: NextAuthOptions = {
           // Fetch the id from public.users
           const publicUser = await prisma.user.findUnique({
             where: { user_id: user.id }, // user.id is from auth.users
-            select: { id: true }, // Fetch only the public.users id
+            select: { id: true, role: true },
           });
 
           if (publicUser) {
             token.publicUserId = publicUser.id; // Add the public.users id to the token
+            token.role = publicUser.role; // Add the role to the token
           }
         }
         return token;
@@ -70,6 +71,7 @@ export const authOptions: NextAuthOptions = {
         if (session.user) {
           session.user.authUserId = token.authUserId as string; // id from auth.users
           session.user.publicUserId = token.publicUserId as string; // id from public.users
+          session.user.role = token.role as string; // role from public.users
         }
         return session;
       },
