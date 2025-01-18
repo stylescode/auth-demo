@@ -26,7 +26,8 @@ export default async function GamePage({ params }: { params: { id: string } }) {
     };
   }
 
-  // Fetch reviews for this game
+  const gameRelease = game ? new Date(game.release).toLocaleDateString() : new Date(gameData.release).toLocaleDateString();
+
   const reviews = await prisma.review.findMany({
     where: { game_id: parseInt(gameId) }
   });
@@ -34,7 +35,7 @@ export default async function GamePage({ params }: { params: { id: string } }) {
   return (
     <div>
       <h1>{gameData.name}</h1>
-      <p>Release Date: </p>
+      <p>Release Date: {gameRelease} </p>
       <h2>Reviews</h2>
       <ReviewSection reviews={reviews} />
       <ReviewForm gameId={gameId} />
