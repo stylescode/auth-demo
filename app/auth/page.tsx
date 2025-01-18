@@ -48,7 +48,7 @@ export default function AuthPage() {
                 return;
             }
 
-            router.push('/');
+            router.push('/games');
         }
     };
 
